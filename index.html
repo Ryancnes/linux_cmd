@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Linux 命令查询手册：收录常用 Linux 命令的中文说明、语法、常用选项与实例，支持全文搜索与分类筛选。">
+  <title>Linux 命令查询手册</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐧</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="container hero-inner">
+      <span class="hero-badge">纯静态 · 无需后端 · 可离线使用</span>
+      <h1 class="hero-title">Linux 命令查询手册</h1>
+      <p class="hero-sub">
+        收录常用 Linux 命令的中文释义、语法、常用选项与示例。
+        <br>支持按命令名或中文功能搜索；在页面上按 <kbd>/</kbd> 可快速聚焦搜索框，按 <kbd>Esc</kbd> 关闭详情。
+      </p>
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>
+        </svg>
+        <input id="searchInput" type="search" autocomplete="off" spellcheck="false"
+               placeholder="搜索命令或功能，例如：grep、查看端口、文件权限…"
+               aria-label="搜索命令">
+        <button id="clearBtn" class="clear-btn" aria-label="清空搜索" hidden>&times;</button>
+      </div>
+      <div id="categoryChips" class="chips" role="group" aria-label="按分类筛选"></div>
+      <p class="hero-stats" id="heroStats"></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="result-bar">
+      <h2 id="resultTitle">全部命令</h2>
+      <span id="resultCount" class="result-count"></span>
+    </div>
+    <div id="commandGrid" class="grid"></div>
+    <div id="emptyState" class="empty" hidden>
+      <div class="empty-icon">🔍</div>
+      <h3 id="emptyTitle">没有找到匹配的命令</h3>
+      <p id="emptyDesc">换个关键词试试，也可以搜索中文功能描述，例如“压缩”“权限”“端口”。</p>
+      <button id="resetBtn" class="btn-secondary">查看全部命令</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>Linux 命令查询手册 — 数据仅供学习参考，实际使用请以 <code>man 命令名</code> 输出为准。</p>
+      <p>由静态页面驱动，可自由 fork 扩充命令库。</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalName">
+      <button class="modal-close" data-close aria-label="关闭">&times;</button>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="js/data/data-file.js"></script>
+  <script src="js/data/data-text.js"></script>
+  <script src="js/data/data-archive.js"></script>
+  <script src="js/data/data-perm.js"></script>
+  <script src="js/data/data-process.js"></script>
+  <script src="js/data/data-system.js"></script>
+  <script src="js/data/data-network.js"></script>
+  <script src="js/data/data-disk.js"></script>
+  <script src="js/data/data-pkg.js"></script>
+  <script src="js/data/data-shell.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
