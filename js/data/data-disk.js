@@ -198,5 +198,84 @@ const DATA_DISK = [
       ["sudo parted /dev/sdb print", "查看磁盘分区表"],
       ["sudo parted -s /dev/sdb mklabel gpt", "把磁盘初始化为 GPT"]
     ]
+  },
+  {
+    name: "pvcreate",
+    category: "磁盘与文件系统",
+    summary: "把分区或磁盘初始化为 LVM 物理卷（PV）",
+    description: "LVM 三层结构的最底层：物理卷 PV → 卷组 VG → 逻辑卷 LV。pvcreate 用于把分区或整块磁盘标记为物理卷，之后才能加入卷组。会覆盖设备上的原有文件系统签名，请先确认数据已备份。",
+    syntax: "sudo pvcreate [选项] 设备",
+    options: [
+      ["-f", "强制创建，覆盖已有的文件系统签名"],
+      ["-y", "所有询问都回答 yes"],
+      ["-u UUID", "指定物理卷的 UUID"],
+      ["-Z y/n", "是否擦除设备前 4 个扇区（提高安全性）"]
+    ],
+    examples: [
+      ["sudo pvcreate /dev/sdb1", "把 /dev/sdb1 初始化为物理卷"],
+      ["sudo pvcreate /dev/sdb /dev/sdc", "一次初始化多块磁盘"],
+      ["sudo pvs", "查看系统中的物理卷列表"],
+      ["sudo pvdisplay", "查看物理卷详细信息"]
+    ]
+  },
+  {
+    name: "vgcreate",
+    category: "磁盘与文件系统",
+    summary: "创建 LVM 卷组（VG）",
+    description: "把多个物理卷（PV）组合成一个存储池，即卷组。卷组内的空间可以灵活划分给多个逻辑卷，后续还能在线扩容。",
+    syntax: "sudo vgcreate [选项] 卷组名 物理卷...",
+    options: [
+      ["-s 大小", "指定物理扩展块（PE）大小，默认 4M，如 -s 16M"],
+      ["-l N", "设置卷组中允许的最大逻辑卷数量"],
+      ["-p N", "设置卷组中允许的最大物理卷数量"],
+      ["-A y/n", "设置卷组是否自动激活"]
+    ],
+    examples: [
+      ["sudo vgcreate vg_data /dev/sdb1", "用单个物理卷创建卷组 vg_data"],
+      ["sudo vgcreate -s 16M vg_data /dev/sdb1 /dev/sdc1", "用多块盘创建卷组并指定 PE 大小"],
+      ["sudo vgs", "查看卷组列表与剩余空间"],
+      ["sudo vgdisplay vg_data", "查看卷组详细信息"]
+    ]
+  },
+  {
+    name: "lvcreate",
+    category: "磁盘与文件系统",
+    summary: "在卷组中创建逻辑卷（LV）",
+    description: "从卷组中划分出逻辑卷，逻辑卷就相当于一块可格式化、可挂载的“虚拟分区”，大小可以按需指定，也可用尽剩余空间，或创建快照用于备份。",
+    syntax: "sudo lvcreate [选项] 卷组名",
+    options: [
+      ["-L 大小", "按容量创建，如 -L 50G"],
+      ["-l 数量", "按 PE 数量或百分比创建，如 -l 100%FREE"],
+      ["-n 名称", "指定逻辑卷名称"],
+      ["-s", "创建快照卷（配合 -n 与源逻辑卷使用）"],
+      ["-T", "创建精简（thin）逻辑卷池"]
+    ],
+    examples: [
+      ["sudo lvcreate -L 50G -n lv_www vg_data", "创建 50G 的逻辑卷 lv_www"],
+      ["sudo lvcreate -l 100%FREE -n lv_home vg_data", "用尽剩余空间创建 lv_home"],
+      ["sudo lvcreate -s -L 10G -n snap_home /dev/vg_data/lv_home", "为 lv_home 创建 10G 快照"],
+      ["sudo lvs", "查看逻辑卷列表"],
+      ["sudo mkfs.ext4 /dev/vg_data/lv_www", "格式化新创建的逻辑卷"]
+    ]
+  },
+  {
+    name: "lvextend",
+    category: "磁盘与文件系统",
+    summary: "扩展逻辑卷容量",
+    description: "在线扩大逻辑卷的大小，卷组中还有剩余空间即可扩容。加 -r 可在扩容的同时扩展文件系统（ext4 调 resize2fs、xfs 调 xfs_growfs），一条命令完成，最省事。",
+    syntax: "sudo lvextend [选项] 逻辑卷路径",
+    options: [
+      ["-L +大小", "增加指定容量，如 -L +20G"],
+      ["-L 大小", "把逻辑卷调整为指定总容量"],
+      ["-l +100%FREE", "把卷组剩余空间全部加入"],
+      ["-r", "同时扩展文件系统（推荐）"],
+      ["--resizefs", "与 -r 作用相同"]
+    ],
+    examples: [
+      ["sudo lvextend -L +20G /dev/vg_data/lv_www", "为逻辑卷增加 20G"],
+      ["sudo lvextend -l +100%FREE -r /dev/vg_data/lv_home", "用尽剩余空间并同步扩展文件系统"],
+      ["sudo resize2fs /dev/vg_data/lv_www", "ext4 文件系统手动扩容（未加 -r 时使用）"],
+      ["sudo xfs_growfs /data", "xfs 文件系统扩容（对挂载点执行）"]
+    ]
   }
 ];

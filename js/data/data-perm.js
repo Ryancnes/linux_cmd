@@ -39,14 +39,21 @@ const DATA_PERM = [
     name: "chgrp",
     category: "权限与用户管理",
     summary: "修改文件或目录的属组",
-    description: "只修改属组，相当于 chown :组名；需要相应权限。",
+    description: "只修改文件所属用户组，相当于 chown :组名，比 chown 更直接；需要相应权限。",
     syntax: "chgrp [选项] 组名 文件或目录...",
     options: [
+      ["-c", "只在发生更改时显示调试信息"],
+      ["-f", "不显示错误信息"],
+      ["-h", "修改符号链接文件本身，而非其指向的目标"],
+      ["-L", "遍历每个符号链接"],
+      ["-P", "不遍历符号链接（默认行为）"],
       ["-R", "递归修改"],
       ["-v", "显示修改过程"]
     ],
     examples: [
-      ["chgrp developers app.jar", "把文件属组改为 developers"]
+      ["chgrp developers app.jar", "把文件属组改为 developers"],
+      ["chgrp -v developers Dir", "修改属组并显示过程"],
+      ["chgrp -R developers Dir", "递归修改目录及其下所有文件的属组"]
     ]
   },
   {
@@ -129,54 +136,85 @@ const DATA_PERM = [
     name: "useradd",
     category: "权限与用户管理",
     summary: "创建新用户",
-    description: "创建用户账号，通常配合 -m 同时创建主目录（Debian/Ubuntu 默认加 -m 才会建目录）。",
+    description: "创建并设置用户信息，会一并处理基本组、家目录等。Debian/Ubuntu 上需要显式加 -m 才会创建家目录；修改已有用户请用 usermod，改密码用 passwd。",
     syntax: "useradd [选项] 用户名",
     options: [
-      ["-m", "创建主目录并复制默认配置"],
-      ["-s shell", "指定登录 shell，如 /bin/bash"],
-      ["-G 组名", "把用户加入附加组，多个组用逗号分隔"],
-      ["-u N", "指定 UID"],
-      ["-e 日期", "设置账号过期日期"]
+      ["-m", "创建用户家目录并复制骨架目录配置"],
+      ["-M", "不创建家目录"],
+      ["-d 目录", "指定登录时的家目录路径"],
+      ["-u N", "指定用户 UID"],
+      ["-g 组名", "指定用户的基本组"],
+      ["-G 组名", "指定附加组，多个组用逗号分隔"],
+      ["-s shell", "指定登录 shell，如 /bin/bash、/sbin/nologin"],
+      ["-e 日期", "设置账号过期日期，如 -e 2025-12-31"],
+      ["-f N", "密码过期 N 天后停用账号"],
+      ["-c 文字", "添加用户备注信息"],
+      ["-r", "创建系统用户"],
+      ["-o", "允许创建 UID 重复的用户"],
+      ["-p 密码", "直接设置加密后的密码"],
+      ["-k 目录", "指定骨架目录（默认 /etc/skel）"]
     ],
     examples: [
       ["sudo useradd -m -s /bin/bash alice", "创建用户并生成主目录"],
-      ["sudo useradd -m -G docker dev", "创建用户并加入 docker 组"],
-      ["sudo passwd alice", "接着为用户设置密码"]
+      ["sudo useradd -M -s /sbin/nologin webuser", "创建服务账号：不建家目录且禁止登录"],
+      ["sudo useradd -u 6688 alice", "创建用户并指定 UID"],
+      ["sudo useradd -m -G group1,group2,group3 dev", "创建用户并指定多个附加组"],
+      ["sudo useradd -e 2025-12-31 -f 30 temp", "设置账号有效期，密码过期 30 天后停用"],
+      ["sudo useradd -d /home/newuser -g root newuser", "指定家目录与基本组"],
+      ["sudo passwd alice", "为用户设置密码"]
     ]
   },
   {
     name: "userdel",
     category: "权限与用户管理",
     summary: "删除用户账号",
-    description: "删除用户；-r 会同时删除其主目录和邮件目录，操作不可恢复，请谨慎。",
+    description: "删除用户信息，实际上就是清理 /etc/passwd、/etc/shadow、/etc/group 中的对应记录。加 -r 会同时删除家目录和邮件目录，操作不可恢复。",
     syntax: "userdel [选项] 用户名",
     options: [
       ["-r", "连同主目录和邮件目录一起删除"],
-      ["-f", "强制删除，即使该用户还在登录"]
+      ["-f", "强制删除，即使用户当前仍在登录"],
+      ["-Z", "删除用户的 SELinux 映射用户"]
     ],
     examples: [
       ["sudo userdel alice", "仅删除账号，保留主目录"],
-      ["sudo userdel -r alice", "删除账号及主目录"]
+      ["sudo userdel -r alice", "删除账号及家目录"],
+      ["sudo userdel -f username", "即使用户正在登录也强制删除"]
     ]
   },
   {
     name: "usermod",
     category: "权限与用户管理",
     summary: "修改已有用户账号的属性",
-    description: "修改用户的组、shell、主目录、锁定状态等；修改后需用户重新登录生效。",
+    description: "修改已有用户的各项信息，无需删除重建，参数在下次登录时生效。注意 -G 是覆盖附加组，追加新组必须用 -aG。",
     syntax: "usermod [选项] 用户名",
     options: [
       ["-aG 组名", "追加用户到附加组（必须带 -a 才能避免覆盖）"],
+      ["-G 组名", "直接设置用户的附加组列表（会替换原有设置）"],
+      ["-g 组名", "修改用户的基本组"],
       ["-s shell", "更改登录 shell"],
-      ["-d 目录", "更改主目录"],
+      ["-d 目录", "更改家目录路径"],
+      ["-m", "配合 -d 使用，把家目录内容迁移到新位置"],
       ["-l 新名", "修改用户名"],
+      ["-u N", "修改用户 UID"],
+      ["-e 日期", "修改账号有效期"],
+      ["-f N", "设置密码过期多少天后停用账号"],
+      ["-c 文字", "修改用户备注信息"],
+      ["-p 密码", "设置新的加密密码"],
+      ["-o", "允许 UID 重复"],
       ["-L", "锁定账号"],
-      ["-U", "解锁账号"]
+      ["-U", "解锁账号"],
+      ["-Z", "设置用户的 SELinux 映射用户"]
     ],
     examples: [
       ["sudo usermod -aG sudo alice", "把 alice 加入 sudo 组"],
+      ["sudo usermod -aG group3 username", "为用户的附加组追加 group3"],
+      ["sudo usermod -G group1,group2 username", "把附加组重置为 group1 和 group2"],
+      ["sudo usermod -g newgroup username", "更改用户的基本组"],
+      ["sudo usermod -d /home -m linuxprobe", "修改家目录并迁移原内容"],
+      ["sudo usermod -l newname oldname", "修改用户名"],
       ["sudo usermod -s /bin/zsh alice", "更改用户的登录 shell"],
-      ["sudo usermod -L alice", "锁定账号，禁止登录"]
+      ["sudo usermod -L alice", "锁定账号，禁止登录"],
+      ["sudo usermod -U alice", "解除锁定，恢复登录"]
     ]
   },
   {
@@ -220,6 +258,44 @@ const DATA_PERM = [
       ["getent passwd alice", "按用户名查询账号信息"],
       ["getent group developers", "查询组信息"],
       ["getent hosts example.com", "查询主机名解析结果"]
+    ]
+  },
+  {
+    name: "groupadd",
+    category: "权限与用户管理",
+    summary: "创建新的用户组",
+    description: "创建用户组，让多个用户加入同一个附加组，便于共享文档与统一权限管理。组信息保存在 /etc/group，格式为「组名称:组密码:组ID:组成员」。",
+    syntax: "groupadd [选项] 组名",
+    options: [
+      ["-g N", "指定用户组 ID（GID）"],
+      ["-r", "创建系统用户组"],
+      ["-f", "若用户组已存在，则以成功状态退出"],
+      ["-o", "允许创建 GID 重复的用户组"],
+      ["-p 密码", "设置用户组密码（加密后的字符串）"],
+      ["-K 键=值", "覆盖 /etc/login.defs 中的默认配置"]
+    ],
+    examples: [
+      ["sudo groupadd linuxprobe", "创建用户组 linuxprobe"],
+      ["sudo groupadd -g 6688 linuxprobe", "创建用户组并指定 GID"],
+      ["sudo groupadd -r sysgroup", "创建系统用户组"],
+      ["grep 'developers' /etc/group", "查看组信息与组成员"]
+    ]
+  },
+  {
+    name: "groupdel",
+    category: "权限与用户管理",
+    summary: "删除用户组",
+    description: "删除用户组，即清理 /etc/group 与 /etc/gshadow 中的对应记录。删除前请确认组内已无成员，并建议先备份这两个文件；该操作不可逆，切勿删除 root、wheel 等关键组。",
+    syntax: "groupdel [选项] 组名",
+    options: [
+      ["-f", "强制删除，不进行询问"],
+      ["-h", "显示帮助信息"]
+    ],
+    examples: [
+      ["sudo groupdel linuxcool", "删除指定用户组"],
+      ["sudo groupdel -f linuxcool", "强制删除用户组"],
+      ["grep 'developers' /etc/group", "删除前确认该组是否还有成员"],
+      ["sudo cp /etc/group /etc/group.bak", "删除前备份组配置文件"]
     ]
   }
 ];

@@ -21,43 +21,84 @@ const DATA_NETWORK = [
     name: "curl",
     category: "网络通信",
     summary: "命令行 HTTP 客户端，传输 URL 数据",
-    description: "支持 HTTP/HTTPS/FTP 等多种协议，常用于接口调试、下载文件、发送请求。",
+    description: "CommandLine URL 的缩写，支持 HTTP、HTTPS、FTP 等 30 余种协议，凡是能在浏览器里做的事情，几乎都能用 curl 在终端完成：抓网页源码、下载文件、调试接口、带 Cookie 或身份认证请求等。",
     syntax: "curl [选项] URL",
     options: [
-      ["-o 文件", "把响应写入文件"],
-      ["-O", "按 URL 中的文件名保存"],
-      ["-I", "只获取响应头"],
-      ["-X 方法", "指定请求方法，如 -X POST"],
-      ["-H '头: 值'", "添加请求头"],
-      ["-d 数据", "发送表单数据（自动转为 POST）"],
-      ["-s", "安静模式，不显示进度"],
-      ["-L", "跟随重定向"]
+      ["-o 文件", "把响应写入指定文件"],
+      ["-O", "保留远程文件的原始文件名保存"],
+      ["-I", "只获取 HTTP 响应头信息"],
+      ["-X 方法", "指定请求方法，如 -X POST、-X DELETE"],
+      ["-H '头: 值'", "自定义请求头信息"],
+      ["-d 数据", "以 POST 方式发送数据"],
+      ["-G", "以 GET 方式传送数据"],
+      ["-u 用户:密码", "设置服务器认证的用户名和密码"],
+      ["-T 文件", "上传指定文件"],
+      ["-C -", "断点续传"],
+      ["-A 字符串", "设置用户代理（User-Agent）"],
+      ["-b 字符串", "设置 Cookie 信息"],
+      ["-e URL", "设置来源网址（Referer）"],
+      ["-f", "连接失败时不显示错误信息"],
+      ["-D 文件", "把响应头信息写入指定文件"],
+      ["-s", "静默模式，不显示进度与错误"],
+      ["-L", "自动跟随重定向"],
+      ["-K 文件", "读取指定的配置文件"],
+      ["--connect-timeout N", "设置连接的最大等待秒数"],
+      ["--limit-rate 200k", "限制传输速度"],
+      ["--max-redirs N", "设置最大重定向次数"],
+      ["--progress-bar", "以进度条显示传输进度"],
+      ["--verbose", "显示详细的执行过程"],
+      ["--basic / --digest", "使用 HTTP 基本认证 / 摘要认证"]
     ],
     examples: [
-      ["curl -I https://example.com", "只查看响应头"],
+      ["curl https://www.example.com", "获取网页源码"],
+      ["curl -O https://example.com/docs/book.pdf", "下载文件并保留原始文件名"],
       ["curl -o page.html https://example.com", "下载页面到文件"],
+      ["curl -I https://example.com", "只查看 HTTP 响应头"],
       ["curl -s https://api.github.com/repos/octocat/Hello-World", "请求 JSON 接口"],
-      ["curl -X POST -H 'Content-Type: application/json' -d '{\"name\":\"tom\"}' https://api.example.com/users", "发送 JSON 请求"]
+      ["curl -X POST -H 'Content-Type: application/json' -d '{\"name\":\"tom\"}' https://api.example.com/users", "发送 JSON 请求"],
+      ["curl -u linuxprobe:redhat ftp://ftp.example.com/pub/book.pdf", "带用户名密码下载 FTP 文件"],
+      ["curl --connect-timeout 5 -O https://example.com/big.iso", "限制连接超时后下载文件"]
     ]
   },
   {
     name: "wget",
     category: "网络通信",
     summary: "非交互式网络下载工具",
-    description: "适合在脚本中下载文件，支持断点续传、递归下载和后台下载。",
+    description: "web get 的缩写，从指定网址下载网络文件。即使网络波动也会不断尝试重连直至下载完成，因此在脚本与后台任务中非常稳定。",
     syntax: "wget [选项] URL",
     options: [
       ["-O 文件", "保存为指定文件名"],
+      ["-P 目录", "把文件保存到指定前缀目录"],
       ["-c", "断点续传"],
       ["-b", "后台下载，日志写入 wget-log"],
-      ["-q", "安静模式"],
+      ["-q", "静默模式，不输出信息"],
+      ["-v", "显示执行过程详细信息"],
+      ["-r", "递归下载（慎用，可能抓取整个站点）"],
+      ["-l N", "设置递归的最大目录深度"],
+      ["-nd", "递归下载时不创建目录"],
+      ["-N", "只下载比本地更新的文件"],
+      ["-t N", "设置最大尝试次数"],
+      ["-T N", "设置最长的等待时间（秒）"],
+      ["-w N", "设置两次请求之间的等待间隔（秒）"],
+      ["-S", "显示服务器响应信息"],
+      ["-a 文件", "把日志追加写入指定文件"],
+      ["-o 文件", "把日志写入指定文件"],
+      ["-i 文件", "下载文件中所列出的所有链接"],
+      ["-4 / -6", "使用 IPv4 / IPv6 网络协议"],
       ["--limit-rate=200k", "限制下载速度为 200KB/s"],
-      ["-r", "递归下载（慎用，可能抓取整个站点）"]
+      ["--spider", "仅检查文件是否存在，不下载"],
+      ["--user / --password", "设置认证的用户名与密码"],
+      ["--ask-password", "提示输入密码"],
+      ["--no-proxy", "禁止使用代理"],
+      ["--random-wait", "下载多个文件时随机等待间隔"]
     ],
     examples: [
       ["wget https://example.com/file.zip", "下载文件"],
       ["wget -c -O latest.tar.gz https://example.com/archive.tar.gz", "断点续传并重命名"],
-      ["wget -b -q https://example.com/big.iso", "后台静默下载"]
+      ["wget --limit-rate=300k https://example.com/big.iso", "限速 300KB/s 下载"],
+      ["wget -b https://example.com/big.iso", "后台下载，日志写入 wget-log"],
+      ["wget --spider https://example.com/file.zip", "仅检查文件是否存在"],
+      ["wget -i urls.txt", "批量下载文件中列出的所有链接"]
     ]
   },
   {
@@ -84,18 +125,30 @@ const DATA_NETWORK = [
     name: "scp",
     category: "网络通信",
     summary: "基于 SSH 的安全文件复制",
-    description: "在本地与远程主机之间加密传输文件，用法类似 cp；目录需加 -r。",
+    description: "secure copy 的缩写，基于 SSH 协议在本地与远程主机之间加密复制文件或目录，用法类似 cp。目录需加 -r，端口用大写 -P 指定。",
     syntax: "scp [选项] 源路径 目标路径",
     options: [
       ["-r", "递归复制目录"],
       ["-P 端口", "指定 SSH 端口（注意大写 P）"],
+      ["-p", "保留文件的修改时间、访问时间和权限属性"],
       ["-i 密钥文件", "指定私钥"],
-      ["-C", "传输时启用压缩"]
+      ["-C", "传输时启用压缩"],
+      ["-l 速率", "限制带宽（Kbit/s）"],
+      ["-o 选项", "设置 SSH 选项，如 StrictHostKeyChecking=no"],
+      ["-B", "使用批处理模式，不询问口令"],
+      ["-q", "静默模式，不显示进度"],
+      ["-c 算法", "指定传输加密算法"],
+      ["-F 文件", "指定 SSH 配置文件路径"],
+      ["-S 程序", "指定加密传输所使用的程序"],
+      ["-4 / -6", "使用 IPv4 / IPv6 网络协议"]
     ],
     examples: [
-      ["scp file.txt user@host:/tmp/", "上传文件到远程"],
-      ["scp user@host:/var/log/app.log ./", "从远程下载文件"],
-      ["scp -r project/ user@host:/opt/", "递归上传整个目录"]
+      ["scp File.cfg 192.168.10.10:/Dir", "上传文件到远程主机目录"],
+      ["scp 192.168.10.10:/Dir/File.cfg /root", "从远程主机下载文件到本地"],
+      ["scp -r Dir 192.168.10.10:/Dir", "递归上传整个目录"],
+      ["scp -r 192.168.10.10:/Dir /root", "递归下载远程目录"],
+      ["scp -p File.cfg linuxprobe@192.168.10.10:/Dir", "指定用户上传并保留原始权限属性"],
+      ["scp -P 2222 file.txt user@host:/tmp/", "通过非默认 SSH 端口上传"]
     ]
   },
   {
@@ -273,6 +326,54 @@ const DATA_NETWORK = [
     examples: [
       ["hostname", "查看主机名"],
       ["hostname -i", "查看本机 IP"]
+    ]
+  },
+  {
+    name: "route",
+    category: "网络通信",
+    summary: "查看和管理内核 IPv4 路由表",
+    description: "传统的路由表管理命令，属于 net-tools 套件。新系统推荐改用 ip route，但很多老脚本和旧发行版仍在用 route。",
+    syntax: "route [选项] [add|del] [目标] [gw 网关]",
+    options: [
+      ["-n", "以数字形式显示地址与端口，不做反向解析"],
+      ["-e", "显示更详细的路由信息"],
+      ["-C", "查看路由缓存"],
+      ["add", "添加一条路由"],
+      ["del", "删除一条路由"],
+      ["-net / -host", "指定目标为网段 / 单台主机"],
+      ["gw 网关", "指定下一跳网关地址"],
+      ["-A inet / inet6", "指定地址族为 IPv4 / IPv6"]
+    ],
+    examples: [
+      ["route -n", "以数字形式查看路由表"],
+      ["sudo route add -net 192.168.2.0/24 gw 192.168.1.1", "添加网段路由"],
+      ["sudo route del default gw 192.168.1.1", "删除默认路由"],
+      ["ip route show", "推荐替代方案：用 ip route 查看路由"]
+    ]
+  },
+  {
+    name: "nmcli",
+    category: "网络通信",
+    summary: "NetworkManager 命令行工具（网卡、连接、bond）",
+    description: "管理 NetworkManager 中的网络连接与网卡，可以查看设备状态、启停连接、配置静态 IP，也能创建 bond（网卡绑定）等高级网络。日常维护网卡时非常常用。",
+    syntax: "nmcli [对象] [子命令] [参数]",
+    options: [
+      ["device status", "查看所有网卡设备及其连接状态"],
+      ["connection show", "列出所有网络连接配置"],
+      ["connection up/down 名称", "启用/停用指定连接"],
+      ["connection modify", "修改连接的 IP、DNS、网关等参数"],
+      ["connection add", "新建连接或 bond 等虚拟设备"],
+      ["general status", "查看 NetworkManager 整体状态"],
+      ["radio wifi on/off", "开关 Wi-Fi 无线功能"],
+      ["-p", "以更易读的表格形式输出（pretty）"]
+    ],
+    examples: [
+      ["nmcli device status", "查看网卡设备状态"],
+      ["nmcli connection show", "查看所有网络连接"],
+      ["sudo nmcli connection up 'Wired connection 1'", "启用指定连接"],
+      ["sudo nmcli connection up ens33", "启用指定网卡"],
+      ["sudo nmcli connection modify ens33 ipv4.addresses 192.168.10.20/24 ipv4.gateway 192.168.10.1 ipv4.method manual", "配置静态 IP 地址"],
+      ["sudo nmcli connection add type bond con-name bond0 ifname bond0 mode active-backup", "创建 active-backup 模式的 bond 网卡"]
     ]
   }
 ];

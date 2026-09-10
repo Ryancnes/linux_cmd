@@ -304,17 +304,27 @@ const DATA_TEXT = [
     name: "xargs",
     category: "文件内容与文本处理",
     summary: "把标准输入转换为命令参数",
-    description: "将管道前一个命令的输出按行/空白切分，作为参数传给后续命令，解决参数过长等问题。",
+    description: "将管道前一个命令的输出按空白或指定分隔符切分，转换成后续命令的参数，解决参数过长、批量处理等问题。默认以空格为定界符，可以接收包含换行和空白的内容。",
     syntax: "前一个命令 | xargs [选项] 命令",
     options: [
       ["-n N", "每次最多使用 N 个参数"],
       ["-I {}", "用 {} 占位符替换参数位置"],
-      ["-0", "按 NUL 字符切分，配合 find -print0 使用可安全处理含空格文件名"]
+      ["-d 分隔符", "自定义定界符，如 -dX"],
+      ["-a 文件", "从指定文件读取数据，而不是从标准输入"],
+      ["-0", "按 NUL 字符切分，配合 find -print0 使用可安全处理含空格文件名"],
+      ["-r", "输入为空时不执行后面的命令"],
+      ["-s N", "限制每条命令的最大字符数"],
+      ["-t", "执行前先打印将要运行的命令"],
+      ["-p", "执行每条命令前询问用户确认"]
     ],
     examples: [
       ["find . -name '*.log' | xargs rm", "删除所有 .log 文件"],
       ["find . -name '*.png' -print0 | xargs -0 ls -l", "安全处理含空格的文件名"],
-      ["echo '1 2 3' | xargs -n1 echo item:", "每个数字执行一次命令"]
+      ["cat test.txt | xargs", "把多行文本合并成一行输出"],
+      ["cat test.txt | xargs -n3", "每行只输出 3 个参数"],
+      ["find . -name '*.txt' | xargs -n 5 cp -t /backup/", "每次取 5 个文件复制到 /backup"],
+      ["echo user{1..10} | xargs -n1 useradd", "批量创建 10 个用户"],
+      ["echo 'FirstXSecondXThird' | xargs -dX -n 2", "以 X 为定界符，每行输出 2 段"]
     ]
   },
   {

@@ -241,5 +241,31 @@ const DATA_SYSTEM = [
       ["lsusb", "列出 USB 设备"],
       ["lsusb -t", "查看 USB 拓扑"]
     ]
+  },
+  {
+    name: "sar",
+    category: "系统与硬件信息",
+    summary: "查看系统历史性能数据（CPU / 内存 / IO / 网络）",
+    description: "System Activity Reporter，来自 sysstat 软件包。与 top 只能查看当前状态不同，sar 能读取历史采样数据，用于事后分析负载高峰。使用前需安装：Ubuntu/Debian 执行 apt install sysstat，RHEL/CentOS 执行 yum install sysstat。",
+    syntax: "sar [选项] [间隔 次数]",
+    options: [
+      ["-u", "查看 CPU 使用率（默认）"],
+      ["-r", "查看内存与交换分区使用情况"],
+      ["-b", "查看磁盘 IO 总体情况"],
+      ["-d", "查看各磁盘设备的活动情况"],
+      ["-n DEV", "查看网络接口流量"],
+      ["-q", "查看平均负载与运行队列长度"],
+      ["-s 时间", "指定统计的起始时间，如 -s 10:00:00"],
+      ["-e 时间", "指定统计的结束时间，如 -e 12:00:00"],
+      ["-f 文件", "读取历史数据文件，默认位于 /var/log/sa/saXX"]
+    ],
+    examples: [
+      ["sar 1 5", "每秒采样一次、共 5 次，显示 CPU 使用率"],
+      ["sar -u 1 5", "实时查看 CPU 使用率"],
+      ["sar -r", "查看当天内存使用情况"],
+      ["sar -n DEV 1 3", "查看网络接口流量"],
+      ["sar -f /var/log/sa/sa09 -s 10:00:00 -e 12:00:00", "查看某天 10 点到 12 点的历史数据"],
+      ["sar -q", "查看系统平均负载"]
+    ]
   }
 ];

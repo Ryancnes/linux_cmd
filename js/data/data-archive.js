@@ -4,7 +4,7 @@ const DATA_ARCHIVE = [
     name: "tar",
     category: "压缩与打包",
     summary: "打包或解包文件（常配合 gzip/xz 压缩）",
-    description: "Linux 最常用的归档工具。tar 本身只负责打包，加上 -z/-j/-J 参数可同时调用 gzip/bzip2/xz 压缩。",
+    description: "Linux 最常用的归档工具。tar 本身只负责打包，加上 -z/-j/-J 参数可同时调用 gzip/bzip2/xz 压缩。RHEL 7 / CentOS 7 之后的版本解压时可以省略格式参数，tar 会自动识别。",
     syntax: "tar [选项] 归档文件 [要处理的文件...]",
     options: [
       ["-c", "创建归档（打包）"],
@@ -16,13 +16,21 @@ const DATA_ARCHIVE = [
       ["-v", "显示处理的文件"],
       ["-f", "指定归档文件名，通常放最后"],
       ["-C 目录", "解包到指定目录"],
-      ["--exclude=模式", "打包时排除匹配文件"]
+      ["-p", "解包时保留文件原始权限与属性"],
+      ["-r", "向未压缩的 .tar 包中追加文件（压缩包不支持）"],
+      ["--exclude=模式", "打包时排除匹配文件，可重复使用"],
+      ["--remove-files", "打包完成后删除源文件"],
+      ["--skip-old-files", "解包时跳过已存在的文件，不覆盖"]
     ],
     examples: [
       ["tar -czvf app.tar.gz ./app", "打包 app 目录并 gzip 压缩"],
+      ["tar -cjvf app.tar.bz2 ./app", "使用 bzip2 格式打包"],
       ["tar -xzvf app.tar.gz", "解压 .tar.gz 包"],
-      ["tar -tf app.tar.gz", "不解包，直接查看包内文件列表"],
-      ["tar -xzf app.tar.gz -C /opt", "解压到 /opt 目录"]
+      ["tar -ztvf app.tar.gz | grep '.log'", "查看包内文件并过滤出 .log"],
+      ["tar -xzf app.tar.gz -C /opt/app", "解压到指定目录"],
+      ["tar -zcvf project.tar.gz ./project --exclude=./project/node_modules --exclude=./project/.git", "打包时排除多个目录"],
+      ["tar -rvf files.tar file3.txt", "向未压缩的 tar 包追加文件"],
+      ["sudo tar -zxvpf etc.tar.gz -C /", "解压系统配置并保留原始权限"]
     ]
   },
   {
