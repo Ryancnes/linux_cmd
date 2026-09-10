@@ -48,14 +48,16 @@ kbd {
 }
 
 /* ---------- Hero ---------- */
-/* 顶部横幅背景：先铺深色蒙版（保证白色文字可读），再铺图片 images/bg.jpg。
-   想调整图片的可见程度，改下面 linear-gradient 里的 0.55 / 0.68 两个透明度即可
-   （数字越小图片越清晰，越大背景越暗）。 */
+/* 顶部横幅背景：先铺深色蒙版（保证白色文字可读），再铺动态背景 images/bg.gif。
+   想调整图片的可见程度，改下面 linear-gradient 里的 0.45 / 0.58 两个透明度即可
+   （数字越小图片越清晰，越大背景越暗）。
+   换成静态图只需把 bg.gif 改成 bg.jpg；偏好减少动效的用户会自动回退到静态图，
+   见文件末尾的 prefers-reduced-motion 媒体查询。 */
 .hero {
   background:
     radial-gradient(1100px 420px at 15% -10%, rgba(88, 143, 255, 0.30), transparent 60%),
-    linear-gradient(180deg, rgba(8, 15, 33, 0.55) 0%, rgba(9, 18, 42, 0.68) 100%),
-    url("../images/bg.jpg") center / cover no-repeat;
+    linear-gradient(180deg, rgba(8, 15, 33, 0.45) 0%, rgba(9, 18, 42, 0.58) 100%),
+    url("../images/bg.gif") center / cover no-repeat;
   background-color: #0b1530;
   color: #fff;
   padding: 52px 0 40px;
@@ -83,12 +85,14 @@ kbd {
   margin: 20px 0 8px;
   font-size: clamp(28px, 5vw, 42px);
   letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(6, 12, 28, 0.85), 0 6px 22px rgba(6, 12, 28, 0.6);
 }
 
 .hero-sub {
   margin: 0 0 26px;
   color: #a9bce4;
   font-size: 15px;
+  text-shadow: 0 1px 3px rgba(6, 12, 28, 0.85), 0 4px 16px rgba(6, 12, 28, 0.55);
 }
 
 .search-box {
@@ -575,4 +579,14 @@ mark {
   .modal-body { padding: 26px 18px 22px; }
   .options-table th:nth-child(1) { width: 34%; }
   .card-more { opacity: 1; transform: none; }
+}
+
+/* 系统开启「减少动态效果」时改用静态背景图，避免动图持续播放耗电 */
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    background:
+      radial-gradient(1100px 420px at 15% -10%, rgba(88, 143, 255, 0.30), transparent 60%),
+      linear-gradient(180deg, rgba(8, 15, 33, 0.45) 0%, rgba(9, 18, 42, 0.58) 100%),
+      url("../images/bg.jpg") center / cover no-repeat;
+  }
 }
