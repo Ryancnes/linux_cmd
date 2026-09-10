@@ -48,11 +48,15 @@ kbd {
 }
 
 /* ---------- Hero ---------- */
+/* 顶部横幅背景：先铺深色蒙版（保证白色文字可读），再铺图片 images/bg.jpg。
+   想调整图片的可见程度，改下面 linear-gradient 里的 0.55 / 0.68 两个透明度即可
+   （数字越小图片越清晰，越大背景越暗）。 */
 .hero {
   background:
-    radial-gradient(1100px 420px at 15% -10%, rgba(88, 143, 255, 0.45), transparent 60%),
-    radial-gradient(900px 400px at 90% 10%, rgba(22, 163, 74, 0.22), transparent 55%),
-    linear-gradient(180deg, #0b1530 0%, #0e1b3d 100%);
+    radial-gradient(1100px 420px at 15% -10%, rgba(88, 143, 255, 0.30), transparent 60%),
+    linear-gradient(180deg, rgba(8, 15, 33, 0.55) 0%, rgba(9, 18, 42, 0.68) 100%),
+    url("../images/bg.jpg") center / cover no-repeat;
+  background-color: #0b1530;
   color: #fff;
   padding: 52px 0 40px;
 }
